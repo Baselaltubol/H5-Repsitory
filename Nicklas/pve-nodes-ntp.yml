@@ -1,5 +1,5 @@
 - name: "Set ntp for proxmox nodes"
-  hosts: pvenodes
+  hosts: all
   become: yes
   become_method: sudo
   gather_facts: yes
