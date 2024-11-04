@@ -1,0 +1,13 @@
+- name: "Update PVE nodes"
+  hosts: proxmox16
+
+  tasks:
+    - name: Update apt repo
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+    
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+        force_apt_get: yes

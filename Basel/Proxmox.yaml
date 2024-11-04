@@ -1,0 +1,15 @@
+- name: List VMs on Proxmox servers
+  hosts: proxmox
+  gather_facts: no
+  tasks:
+    - name: Retrieve VM list
+      community.general.proxmox_kvm:
+        api_host: "{{ ansible_host }}"
+        api_user: "ansible@pam"  # API-bruger
+        api_password: "password"  # API-adgangskode
+        validate_certs: no
+      register: vms
+
+    - name: Print VM list
+      debug:
+        var: vms
