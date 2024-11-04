@@ -5,7 +5,7 @@
     - name: Retrieve VM list
       community.general.proxmox_kvm:
         api_host: "{{ ansible_host }}"
-        api_user: "ansible@pve"  # API-bruger
+        api_user: "root@pam"  # API-bruger
         api_password: "password"  # API-adgangskode
         validate_certs: no
       register: vms
