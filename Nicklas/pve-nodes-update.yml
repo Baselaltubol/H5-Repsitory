@@ -1,5 +1,5 @@
 - name: "Update PVE nodes"
-  hosts: proxmox16
+  hosts: pvenodes
 
   tasks:
     - name: Update apt repo
