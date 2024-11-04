@@ -1,14 +1,5 @@
 - name: "Set ntp for proxmox nodes"
   hosts: pvenodes
-  #become: yes
-  #become_method: sudo
-  #gather_facts: yes
-
-#  handlers:
-#  - name: "restart ntp"
-#    ansible.builtin.service:
-#      name: "ntp"
-#      state: "restarted"
 
   tasks:
     - name: Set timezone to Copenhagen
