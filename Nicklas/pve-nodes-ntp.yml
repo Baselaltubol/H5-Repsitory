@@ -1,0 +1,30 @@
+- name: "Set ntp for proxmox nodes"
+  hosts: pvenodes
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+
+
+  vars:
+    ntp_server1: 0.dk.pool.ntp.org
+    ntp_server2: 1.dk.pool.ntp.org
+  
+
+  handlers:
+  - name: "restart ntp"
+    ansible.builtin.service:
+      name: "ntp"
+      state: "restarted"
+
+      
+  tasks:
+  - ansible.builtin.apt:
+      state: "latest"
+      pkg:
+        - "ntp"
+        - "sntp"
+        - "ntp-doc"
+  - ansible.builtin.template:
+      src: "./ntp.conf.j2"
+      dest: "/etc/ntp.conf"
+    notify: "restart ntp"
