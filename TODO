@@ -4,7 +4,7 @@ What should Ansible do?
   - Opsæt defualt vlan til alt udstyr
 2. Update alt linux (apt-get update/upgrade)
 3. NTP - config på alle maskiner (Har Nicklas lavet til proxmox)
-4. Daglig genstart af VM'er
+4. Daglig genstart af VM'er - DONE
 5. Ugentlig genstart af Proxmox
 
 
