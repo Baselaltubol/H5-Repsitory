@@ -27,6 +27,7 @@
         port: 22
         delay: "{{ check_interval }}"
         timeout: "{{ max_retries * check_interval }}"
+        state: started
 
     - name: Confirm server is fully functional
       ansible.builtin.ping:
