@@ -1,0 +1,32 @@
+---
+- name: Sequentially restart Proxmox servers
+  hosts: pvenodes
+  become: true
+  gather_facts: false
+  serial: 1  # Ensures each server is handled one at a time
+
+  vars:
+    wait_time: 300  # Time in seconds to wait before starting the check
+    check_interval: 10  # Time in seconds between each connectivity check
+    max_retries: 20  # Number of retries for checking if the server is up
+
+  tasks:
+    - name: Reboot the server
+      ansible.builtin.shell: "shutdown -r now"
+      async: 1
+      poll: 0
+      ignore_errors: true
+
+    - name: Wait for server to start rebooting
+      pause:
+        seconds: "{{ wait_time }}"
+
+    - name: Wait for server to become available
+      wait_for:
+        host: "{{ inventory_hostname }}"  # Uses the host's IP or hostname from inventory
+        port: 22
+        delay: "{{ check_interval }}"
+        timeout: "{{ max_retries * check_interval }}"
+
+    - name: Confirm server is fully functional
+      ansible.builtin.ping:
