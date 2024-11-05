@@ -6,7 +6,7 @@
   serial: 1  # Ensures each server is handled one at a time
 
   vars:
-    wait_time: 180  # Time in seconds to wait before starting the check
+    wait_time: 600  # Time in seconds to wait before starting the check
     check_interval: 30  # Time in seconds between each connectivity check
     max_retries: 20  # Number of retries for checking if the server is up
 
@@ -20,15 +20,6 @@
     - name: Wait for server to start rebooting
       pause:
         seconds: "{{ wait_time }}"
-
-    - name: Wait for the server to respond to ICMP ping
-      block:
-        - name: Ping the server
-          ansible.builtin.ping:
-          register: ping_result
-          until: ping_result is succeeded
-          retries: "{{ max_retries }}"
-          delay: "{{ check_interval }}"
 
     - name: Confirm server is fully functional
       ansible.builtin.ping:
