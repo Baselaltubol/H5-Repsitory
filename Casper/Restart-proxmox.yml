@@ -23,10 +23,10 @@
 
     - name: Wait for the server to respond to ICMP ping
       ansible.builtin.ping:
-        register: ping_result
-        until: ping_result is succeeded
-        retries: "{{ max_retries }}"
-        delay: "{{ check_interval }}"
+      register: ping_result
+      until: ping_result is succeeded
+      retries: "{{ max_retries }}"
+      delay: "{{ check_interval }}"
 
     - name: Confirm server is fully functional
       ansible.builtin.ping:
