@@ -21,9 +21,9 @@
       pause:
         seconds: "{{ wait_time }}"
 
-    - name: Wait for server to become available
+    - name: Wait for the server to respond to ping
       wait_for:
-        host: "{{ inventory_hostname }}"  # Uses the host's IP or hostname from inventory
+        host: "{{ inventory_hostname }}"
         port: 22
         delay: "{{ check_interval }}"
         timeout: "{{ max_retries * check_interval }}"
