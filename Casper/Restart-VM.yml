@@ -1,0 +1,13 @@
+- name: Gather and restart all VMs on a Proxmox node, excluding VMID 800
+  hosts: proxmox15
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Gather all VM IDs
+      shell: "pvesh get /cluster/resources --type vm"
+      register: vmid_output
+
+    - name: Extract VM IDs and exclude VMID 800
+      set_fact:
+        vmids: "{{ vmid_output.stdout | from_json | map(attribute='vmid') | select('ne', 800) | list }}"
