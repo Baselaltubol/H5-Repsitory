@@ -1,5 +1,5 @@
 - name: Gather and restart all VMs on a Proxmox node, excluding VMID 800
-  hosts: proxmox15
+  hosts: pvenodes
   become: true
   gather_facts: false
 
