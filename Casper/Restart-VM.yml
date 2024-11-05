@@ -10,4 +10,4 @@
 
     - name: Extract VM IDs and exclude VMID 800
       set_fact:
-        vmids: "{{ vmid_output.stdout | from_json | map(attribute='vmid') | select('ne', 800) | list }}"
+        vmids: "{{ vmid_output.stdout | from_json | selectattr('vmid', 'defined') | map(attribute='vmid') | select('ne', 800) | list }}"
