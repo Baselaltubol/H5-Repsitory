@@ -1,0 +1,21 @@
+What should Ansible do?
+
+1. Basic Config af netværksudstyr
+  - Opsæt defualt vlan til alt udstyr
+2. Update alt linux (apt-get update/upgrade)
+3. NTP - config på alle maskiner (Har Nicklas lavet til proxmox)
+4. Daglig genstart af VM'er
+5. Ugentlig genstart af Proxmox
+
+
+
+
+
+
+
+
+
+
+Ekstras
+
+1. Create new VM in proxmox
