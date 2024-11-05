@@ -22,14 +22,13 @@
         seconds: "{{ wait_time }}"
 
     - name: Wait for the server to respond to ICMP ping
-      ansible.builtin.wait_for:
-        host: "{{ inventory_hostname }}"
-        state: started
-        timeout: "{{ max_retries * check_interval }}"
-        delay: "{{ check_interval }}"
-      register: ping_result
-      until: ping_result is succeeded
-      retries: "{{ max_retries }}"
+      block:
+        - name: Ping the server
+          ansible.builtin.ping:
+          register: ping_result
+          until: ping_result is succeeded
+          retries: "{{ max_retries }}"
+          delay: "{{ check_interval }}"
 
     - name: Confirm server is fully functional
       ansible.builtin.ping:
