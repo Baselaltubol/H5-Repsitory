@@ -16,7 +16,7 @@
       loop: "{{ vmids }}"
       vars:
         vmid: "{{ item }}"
-      shell: "qm reset {{ vmid }}"
+      shell: "qm reboot {{ vmid }}"
       register: restart_results
       ignore_errors: true
 
