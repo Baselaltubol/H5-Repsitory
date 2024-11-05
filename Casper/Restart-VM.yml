@@ -1,13 +1,26 @@
-- name: Gather and restart all VMs on a Proxmox node, excluding VMID 800
+- name: Gather and restart running VMs on a Proxmox node, excluding VMID 800
   hosts: pvenodes
   become: true
   gather_facts: false
 
   tasks:
-    - name: Gather VM IDs using qm list
-      shell: "qm list | awk 'NR>1 {print $1}'"
+    - name: Gather running VM IDs using qm list
+      shell: "qm list | awk '$3 == \"running\" {print $1}'"
       register: vmid_output
 
     - name: Filter out VMID 800
       set_fact:
         vmids: "{{ vmid_output.stdout_lines | select('ne', '800') | list }}"
+
+    - name: Restart each running VM, excluding VMID 800
+      loop: "{{ vmids }}"
+      vars:
+        vmid: "{{ item }}"
+      shell: "qm reset {{ vmid }}"
+      register: restart_results
+      ignore_errors: true
+
+    - name: Display restart results
+      debug:
+        msg: "Restarted VM {{ item }}: {{ restart_results.results[loop.index0].stdout }}"
+      loop: "{{ vmids }}"
