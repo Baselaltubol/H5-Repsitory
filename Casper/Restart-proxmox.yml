@@ -6,7 +6,7 @@
   serial: 1  # Ensures each server is handled one at a time
 
   vars:
-    wait_time: 60  # Time in seconds to wait before starting the check
+    wait_time: 180  # Time in seconds to wait before starting the check
     check_interval: 10  # Time in seconds between each connectivity check
     max_retries: 20  # Number of retries for checking if the server is up
 
