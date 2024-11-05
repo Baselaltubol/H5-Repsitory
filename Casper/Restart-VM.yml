@@ -4,9 +4,14 @@
   gather_facts: false
 
   tasks:
-    - name: Gather all VM IDs
+    - name: Gather all VM details
       shell: "pvesh get /cluster/resources --type vm"
       register: vmid_output
+
+    - name: Check if output is valid JSON
+      fail:
+        msg: "The output from 'pvesh' is not valid JSON: {{ vmid_output.stdout }}"
+      when: vmid_output.stdout | length == 0 or (vmid_output.stdout | from_json | type_debug != 'list')
 
     - name: Extract VM IDs and exclude VMID 800
       set_fact:
