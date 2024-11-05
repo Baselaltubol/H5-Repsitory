@@ -20,14 +20,21 @@
     - name: Wait for server to start rebooting
       pause:
         seconds: "{{ wait_time }}"
-        
+
+    #- name: Wait for the server to respond to ping
+      #wait_for:
+        #host: "{{ inventory_hostname }}"
+        #port: 22
+        #delay: "{{ check_interval }}"
+        #timeout: "{{ max_retries * check_interval }}"
+        #state: started
     - name: Wait for the server to respond to ICMP ping
-      host: "{{ inventory_hostname }}"
+      hosts: "{{ inventory_hostname }}"
       ansible.builtin.ping:
-      register: ping_result
-      until: ping_result is succeeded
-      retries: "{{ max_retries }}"
-      delay: "{{ check_interval }}"
+        register: ping_result
+        until: ping_result is succeeded
+        retries: "{{ max_retries }}"
+        delay: "{{ check_interval }}"
 
     - name: Confirm server is fully functional
       ansible.builtin.ping:
