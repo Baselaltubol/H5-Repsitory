@@ -88,7 +88,7 @@
           cipassword: "{{ user_password }}"
           searchdomain: ""
           nameserver: "8.8.8.8"  # Configure DNS
-          ipconfig0: "dhcp"
+          ipconfig0: "ip=dhcp"
         validate_certs: no
       when: vm_creation.status == 200
 
