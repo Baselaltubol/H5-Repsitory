@@ -20,7 +20,7 @@
     user_name: "user"
     user_password: "password" 
     filename: "vm-{{ vm_id }}-disk-0"
-    ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOEUhBbR8H/oNlEmoh56VNb4UwBqZKRVxZXL3FNDW/Jd semaphore@ansible"
+    ssh_key: "ssh-ed25519%20AAAAC3NzaC1lZDI1NTE5AAAAIOEUhBbR8H/oNlEmoh56VNb4UwBqZKRVxZXL3FNDW/Jd%20semaphore@ansible"
 
   tasks:
     - name: Get Proxmox API token
@@ -88,16 +88,8 @@
           ide1: "{{ cloudinit_storage }}:cloudinit"
           ciuser: "{{ user_name }}"
           cipassword: "{{ user_password }}"
-          hostname: "Ubuntu"  # Set hostname to 'Ubuntu'
-          timezone: "Europe/Copenhagen"  # Danish timezone
-          language: "en_US"  # Set language to English
           keyboard: "da"  # Set keyboard to Danish
-          disable_root: 1  # Disable root login, use cloud-init user instead
           sshkeys: "{{ ssh_key }}"  # Provide your SSH public key here
-          ssh_pwauth: 1  # Enable SSH password authentication
-          apt_sources:
-            - "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
-          user-data: |
             #cloud-config
             locale: en_US.UTF-8
             timezone: Europe/Copenhagen
