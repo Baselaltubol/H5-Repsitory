@@ -36,7 +36,7 @@
 
     - name: Create Ceph disk for VM
       uri:
-        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ ceph_storage_pool }}/content"
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content"
         method: POST
         headers:
           CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
