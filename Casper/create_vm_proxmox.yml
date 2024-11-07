@@ -12,7 +12,7 @@
     vm_storage: "CephStorage" # Replace with your Proxmox node name
     iso_storage: "cephfs"
     iso_image: "ubuntu-24.04.1-live-server-amd64.iso"  # ISO file path
-    cloudinit_storage: "local"
+    cloudinit_storage: "CephStorage"
     vm_disk_size: "32G"
     vm_memory: 2048
     vm_cores: 2
