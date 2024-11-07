@@ -1,0 +1,7 @@
+- name: "Set ntp for all linux servers"
+  hosts: all
+
+  tasks:
+    - name: Set timezone to Copenhagen
+      ansible.builtin.timezone:
+        name: Europe/Copenhagen
