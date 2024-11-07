@@ -34,7 +34,7 @@
         validate_certs: no
       register: auth
 
-   - name: Create Ceph disk for VM
+    - name: Create Ceph disk for VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ ceph_storage_pool }}/content"
         method: POST
