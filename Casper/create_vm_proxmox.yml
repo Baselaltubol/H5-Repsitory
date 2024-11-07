@@ -1,14 +1,15 @@
 ---
 - name: Create and configure a new Proxmox VM with Ubuntu Server
-  hosts: proxmox15
+  hosts: localhost
   gather_facts: no
   vars:
     proxmox_host: "10.131.9.150"
     proxmox_user: "root@pam"
-    proxmox_password: "password"
+    proxmox_password: "your-proxmox-password"
     vm_id: 100
     vm_name: "Ubuntu-VM"
-    iso_image: "cephfs:iso/ubuntu-24.04.1-live-server-amd64.iso"  # Adjust to your ISO path
+    iso_storage: "cephfs"  # Adjust if the ISO is on a different storage
+    iso_image: "ubuntu-24.04.1-live-server-amd64.iso"  # ISO filename without storage path
     vm_disk_size: "32G"
     vm_memory: 2048
     vm_cores: 2
@@ -17,7 +18,7 @@
     user_password: "password"
   
   tasks:
-    - name: Create Proxmox VM
+    - name: Create Proxmox VM with basic configuration
       community.general.proxmox_kvm:
         api_host: "{{ proxmox_host }}"
         api_user: "{{ proxmox_user }}"
@@ -28,14 +29,15 @@
         name: "{{ vm_name }}"
         memory: "{{ vm_memory }}"
         cores: "{{ vm_cores }}"
-        disks:
-          - size: "{{ vm_disk_size }}"
-        cdrom: "{{ iso_image }}"
-        net0: "virtio,bridge={{ vm_net_bridge }}"
-        onboot: yes
+        storage: "CephStorage"  # Specify storage for VM disk
+        disk: "{{ vm_disk_size }}"
+        net: "virtio,bridge={{ vm_net_bridge }}"
         boot: "order=cdrom"
+        ostype: "l26"  # Set OS type as Linux (26)
+        cdrom: "{{ iso_storage }}:iso/{{ iso_image }}"  # Set boot ISO
+        onboot: yes
       register: vm_creation
-
+      
     - name: Start the new VM
       community.general.proxmox_kvm:
         api_host: "{{ proxmox_host }}"
