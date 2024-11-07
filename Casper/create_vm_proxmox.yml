@@ -1,0 +1,75 @@
+---
+- name: Create and configure a new Proxmox VM with Ubuntu Server
+  hosts: proxmox15
+  gather_facts: no
+  vars:
+    proxmox_host: "10.131.9.150"
+    proxmox_user: "root@pam"
+    proxmox_password: "password"
+    vm_id: 100
+    vm_name: "Ubuntu-VM"
+    iso_image: "cephfs:iso/ubuntu-24.04.1-live-server-amd64.iso"  # Adjust to your ISO path
+    vm_disk_size: "32G"
+    vm_memory: 2048
+    vm_cores: 2
+    vm_net_bridge: "vmbr1"  # Proxmox network bridge
+    user_name: "user"
+    user_password: "password"
+  
+  tasks:
+    - name: Create Proxmox VM
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_host }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: no
+        node: "proxmox15"  # Replace with your Proxmox node name
+        vmid: "{{ vm_id }}"
+        name: "{{ vm_name }}"
+        memory: "{{ vm_memory }}"
+        cores: "{{ vm_cores }}"
+        disks:
+          - size: "{{ vm_disk_size }}"
+        cdrom: "{{ iso_image }}"
+        net0: "virtio,bridge={{ vm_net_bridge }}"
+        onboot: yes
+        boot: "order=cdrom"
+      register: vm_creation
+
+    - name: Start the new VM
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_host }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: no
+        node: "proxmox-node-name"
+        vmid: "{{ vm_id }}"
+        state: started
+      when: vm_creation.changed
+
+    - name: Wait for VM to be accessible via SSH
+      wait_for:
+        host: "{{ vm_name }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      delegate_to: localhost
+
+    - name: Install OpenSSH and setup DHCP
+      ansible.builtin.shell: |
+        echo "{{ user_name }}:{{ user_password }}" | chpasswd
+        apt-get update
+        apt-get install -y openssh-server
+        systemctl enable ssh
+        systemctl start ssh
+      become: true
+      become_user: "{{ user_name }}"
+      vars:
+        ansible_ssh_user: "{{ user_name }}"
+        ansible_ssh_pass: "{{ user_password }}"
+        ansible_become_pass: "{{ user_password }}"
+      register: setup
+
+    - name: Display setup status
+      debug:
+        msg: "Setup complete with OpenSSH and DHCP enabled on {{ vm_name }}"
