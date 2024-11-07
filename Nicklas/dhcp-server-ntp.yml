@@ -1,0 +1,7 @@
+- name: "Set ntp for proxmox nodes"
+  hosts: DHCP
+
+  tasks:
+    - name: Set timezone to Copenhagen
+      ansible.builtin.timezone:
+        name: Europe/Copenhagen
