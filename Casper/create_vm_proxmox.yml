@@ -75,6 +75,7 @@
         timeout: 120
       register: vm_creation
 
+   
     - name: Attach cloud-init drive to VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/config"
@@ -84,17 +85,35 @@
           Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
         body_format: json
         body:
-           body:
           ide1: "{{ cloudinit_storage }}:cloudinit"
           ciuser: "{{ user_name }}"
           cipassword: "{{ user_password }}"
           hostname: "Ubuntu"  # Set hostname to 'Ubuntu'
           timezone: "Europe/Copenhagen"  # Danish timezone
           language: "en_US"  # Set language to English
-          keyboard: "da"  # Set keyboard to Danish
-          disable_root: 0  # Allow root login via SSH
-          sshkeys: "{{ ssh_key }}"  # Provide your SSH public key here
+          keyboard: "dk"  # Set keyboard to Danish
+          disable_root: 1  # Disable root login, use cloud-init user instead
+          sshkeys: "{{ lookup('file', ssh_key_path) }}"  # Provide your SSH public key here
           ssh_pwauth: 1  # Enable SSH password authentication
+          apt_sources:
+            - "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
+          user-data: |
+            #cloud-config
+            locale: en_US.UTF-8
+            timezone: Europe/Copenhagen
+            keyboard: da
+            ssh_authorized_keys:
+              - "{{ ssh_key }}"
+            users:
+              - name: "{{ user_name }}"
+                password: "{{ user_password }}"
+                sudo: ALL=(ALL) NOPASSWD:ALL
+                shell: /bin/bash
+                groups: sudo
+                lock_passwd: false
+            packages:
+              - openssh-server
+              - cloud-init
           ipconfig0: "ip=dhcp"  # Enable DHCP
         validate_certs: no
       when: vm_creation.status == 200
