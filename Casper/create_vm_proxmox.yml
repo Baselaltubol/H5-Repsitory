@@ -49,7 +49,7 @@
           cores: "{{ vm_cores }}"
           net0: "virtio,bridge={{ vm_net_bridge }}"
           ide2: "{{ iso_storage }}:iso/{{ iso_image }},media=cdrom"
-          scsi0: "local:32G"
+          scsi0: "{{ vm_storage }}:vm-{{ vm_id }}-disk-1,size={{ vm_disk_size }}"
           boot: "order=ide2;scsi0"
           ostype: "l26"
           onboot: 1
