@@ -1,6 +1,7 @@
 - name: "Install QEMU"
   hosts: guacamole
   become: true
+  become_pass: "password"
 
   tasks:
     - name: Install QEMU
