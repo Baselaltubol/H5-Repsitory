@@ -1,0 +1,7 @@
+- name: Test connectivity to Cisco devices
+  hosts: cisco_devices
+  gather_facts: no
+  tasks:
+    - name: Ping the device
+      ansible.netcommon.cli_command:
+        command: "ping 10.131.10.81"
