@@ -89,7 +89,6 @@
           ciuser: "{{ user_name }}"
           cipassword: "{{ user_password }}"
           keyboard: "da"  # Set keyboard to Danish
-          sshkeys: "{{ ssh_key }}"  # Provide your SSH public key here
           ipconfig0: "ip=dhcp"  # Enable DHCP
         validate_certs: no
       when: vm_creation.status == 200
