@@ -91,9 +91,9 @@
           hostname: "Ubuntu"  # Set hostname to 'Ubuntu'
           timezone: "Europe/Copenhagen"  # Danish timezone
           language: "en_US"  # Set language to English
-          keyboard: "dk"  # Set keyboard to Danish
+          keyboard: "da"  # Set keyboard to Danish
           disable_root: 1  # Disable root login, use cloud-init user instead
-          sshkeys: "{{ lookup('file', ssh_key_path) }}"  # Provide your SSH public key here
+          sshkeys: "{{ ssh_key }}"  # Provide your SSH public key here
           ssh_pwauth: 1  # Enable SSH password authentication
           apt_sources:
             - "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
@@ -102,8 +102,6 @@
             locale: en_US.UTF-8
             timezone: Europe/Copenhagen
             keyboard: da
-            ssh_authorized_keys:
-              - "{{ ssh_key }}"
             users:
               - name: "{{ user_name }}"
                 password: "{{ user_password }}"
