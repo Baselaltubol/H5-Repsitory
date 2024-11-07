@@ -1,5 +1,5 @@
-- name: "Update PVE nodes"
-  hosts: pvenodes
+- name: "Update all linux"
+  hosts: all
 
   tasks:
     - name: Update apt repo
