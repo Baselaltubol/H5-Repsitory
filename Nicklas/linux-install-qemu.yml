@@ -1,6 +1,5 @@
 - name: "Install QEMU"
   hosts: guacamole
-  gather_facts: false
 
   tasks:
     - name: Test connection
