@@ -6,7 +6,7 @@
     proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
     proxmox_user: "root@pam"
     proxmox_password: "password"
-    vm_id: 100
+    vm_id: 402
     vm_name: "Ubuntu-VM"
     node: "proxmox15"
     vm_storage: "CephStorage" # Replace with your Proxmox node name
@@ -49,7 +49,7 @@
           cores: "{{ vm_cores }}"
           net0: "virtio,bridge={{ vm_net_bridge }}"
           ide2: "{{ iso_storage }}:iso/{{ iso_image }},media=cdrom"
-          scsi0: "{{vm_storage}}:{{ vm_disk_size }}"
+          scsi0: "CephStorage:32G"
           boot: "order=ide2;scsi0"
           ostype: "l26"
           onboot: 1
