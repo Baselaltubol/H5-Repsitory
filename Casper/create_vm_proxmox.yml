@@ -90,20 +90,6 @@
           cipassword: "{{ user_password }}"
           keyboard: "da"  # Set keyboard to Danish
           sshkeys: "{{ ssh_key }}"  # Provide your SSH public key here
-            #cloud-config
-            locale: en_US.UTF-8
-            timezone: Europe/Copenhagen
-            keyboard: da
-            users:
-              - name: "{{ user_name }}"
-                password: "{{ user_password }}"
-                sudo: ALL=(ALL) NOPASSWD:ALL
-                shell: /bin/bash
-                groups: sudo
-                lock_passwd: false
-            packages:
-              - openssh-server
-              - cloud-init
           ipconfig0: "ip=dhcp"  # Enable DHCP
         validate_certs: no
       when: vm_creation.status == 200
