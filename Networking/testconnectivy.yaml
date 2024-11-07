@@ -2,6 +2,12 @@
   hosts: cisco_devices
   gather_facts: no
   tasks:
-    - name: Ping the device
+    - name: Check device hostname to confirm connectivity
       ansible.netcommon.cli_command:
-        command: "ping 10.131.10.81"
+        command: "show version | include uptime"
+      register: result
+      ignore_errors: yes
+
+    - name: Display hostname result
+      debug:
+        msg: "Device {{ inventory_hostname }} response: {{ result.stdout if result is defined else 'No response' }}"
