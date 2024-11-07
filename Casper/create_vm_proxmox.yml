@@ -31,7 +31,9 @@
         cores: "{{ vm_cores }}"
         storage: "CephStorage"  # Specify storage for VM disk
         disk: "{{ vm_disk_size }}"
-        net: "virtio,bridge={{ vm_net_bridge }}"
+        net:
+          - model: virtio
+            bridge: "{{ vm_net_bridge }}"
         boot: "order=cdrom"
         ostype: "l26"  # Set OS type as Linux (26)
         cdrom: "{{ iso_storage }}:iso/{{ iso_image }}"  # Set boot ISO
