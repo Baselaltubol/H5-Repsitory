@@ -1,4 +1,4 @@
-- name: "Set ntp for proxmox nodes"
+- name: "Set ntp for dhcp server"
   hosts: DHCP
 
   tasks:
