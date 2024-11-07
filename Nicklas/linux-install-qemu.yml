@@ -1,0 +1,8 @@
+- name: "Set ntp for all linux servers"
+  hosts: wazuh
+
+  tasks:
+    - name:
+      apt:
+        name: qemu-guest-agent
+        state: latest
