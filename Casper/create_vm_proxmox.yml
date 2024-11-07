@@ -19,7 +19,7 @@
     vm_net_bridge: "vmbr1"  # Network bridge in Proxmox
     user_name: "user"
     user_password: "password" 
-    filename: "vm-{{ vmid }}-disk-0"
+    filename: "vm-{{ vm_id }}-disk-0"
 
   tasks:
     - name: Get Proxmox API token
@@ -47,7 +47,7 @@
           vmid: "{{ vm_id }}"
           format: "raw"
           size: "{{ vm_disk_size }}"
-          filename: {{ filename }}
+          filename: "{{ filename }}"
         validate_certs: no
       register: ceph_disk_creation
 
