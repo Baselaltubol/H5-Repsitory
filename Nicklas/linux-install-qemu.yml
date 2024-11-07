@@ -1,5 +1,5 @@
 - name: "Set ntp for all linux servers"
-  hosts: wazuh
+  hosts: guacamole
 
   tasks:
     - name:
