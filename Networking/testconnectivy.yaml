@@ -10,4 +10,4 @@
 
     - name: Display hostname result
       debug:
-        msg: "Device {{ inventory_hostname }} response: {{ result.stdout if result is defined else 'No response' }}"
+        var: result.stdout
