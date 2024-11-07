@@ -120,7 +120,7 @@
             - echo "Running custom commands"
             - ifconfig
         dest: "/tmp/user-data"
-      delegate_to: localhost
+      delegate_to: "Ubuntu-VM"
 
 
     - name: Start VM
