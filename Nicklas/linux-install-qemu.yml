@@ -2,6 +2,9 @@
   hosts: guacamole
 
   tasks:
+    - name: Test connection
+      ansible.builtin.ping:
+
     - name:
       apt:
         name: qemu-guest-agent
