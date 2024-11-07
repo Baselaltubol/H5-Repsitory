@@ -71,6 +71,7 @@
           ostype: "l26"
           onboot: 1
         validate_certs: no
+        timeout: 120
       register: vm_creation
 
     - name: Attach cloud-init drive to VM
