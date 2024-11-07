@@ -8,7 +8,8 @@
     proxmox_password: "password"
     vm_id: 100
     vm_name: "Ubuntu-VM"
-    node: "proxmox15"  # Replace with your Proxmox node name
+    node: "proxmox15"
+    vm_storage: "CephStorage" # Replace with your Proxmox node name
     iso_storage: "cephfs"
     iso_image: "ubuntu-24.04.1-live-server-amd64.iso"  # ISO file path
     cloudinit_storage: "local"
@@ -48,7 +49,7 @@
           cores: "{{ vm_cores }}"
           net0: "virtio,bridge={{ vm_net_bridge }}"
           ide2: "{{ iso_storage }}:iso/{{ iso_image }},media=cdrom"
-          scsi0: "CephStorage:{{ vm_disk_size }}"
+          scsi0: "{{vm_storage}}:{{ vm_disk_size }}"
           boot: "order=ide2;scsi0"
           ostype: "l26"
           onboot: 1
