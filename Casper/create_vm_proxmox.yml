@@ -5,7 +5,7 @@
   vars:
     proxmox_host: "10.131.9.150"
     proxmox_user: "root@pam"
-    proxmox_password: "your-proxmox-password"
+    proxmox_password: "password"
     vm_id: 100
     vm_name: "Ubuntu-VM"
     iso_storage: "cephfs"  # Adjust if the ISO is on a different storage
@@ -18,26 +18,37 @@
     user_password: "password"
   
   tasks:
-    - name: Create Proxmox VM with basic configuration
+    - name: Create Proxmox VM without disk or ISO
       community.general.proxmox_kvm:
         api_host: "{{ proxmox_host }}"
         api_user: "{{ proxmox_user }}"
         api_password: "{{ proxmox_password }}"
         validate_certs: no
-        node: "proxmox15"  # Replace with your Proxmox node name
+        node: "proxmox-node-name"  # Replace with your Proxmox node name
         vmid: "{{ vm_id }}"
         name: "{{ vm_name }}"
         memory: "{{ vm_memory }}"
         cores: "{{ vm_cores }}"
-        storage: "CephStorage"  # Specify storage for VM disk
-        disk: "{{ vm_disk_size }}"
-        net0: "virtio,bridge={{ vm_net_bridge }}"
-        boot: "order=cdrom"
+        net:
+          - model: virtio
+            bridge: "{{ vm_net_bridge }}"
         ostype: "l26"  # Set OS type as Linux (26)
-        cdrom: "{{ iso_storage }}:iso/{{ iso_image }}"  # Set boot ISO
         onboot: yes
       register: vm_creation
-      
+
+    - name: Add ISO and disk to the VM
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_host }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: no
+        node: "proxmox-node-name"
+        vmid: "{{ vm_id }}"
+        ide: "{{ iso_storage }}:iso/{{ iso_image }}"  # Attach ISO as IDE drive for installation
+        virtio: "{{ iso_storage }}:{{ vm_disk_size }}"  # Add virtio storage for VM disk
+        boot: "order=cdrom"  # Boot from the ISO
+      when: vm_creation.changed
+
     - name: Start the new VM
       community.general.proxmox_kvm:
         api_host: "{{ proxmox_host }}"
