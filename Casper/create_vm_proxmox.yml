@@ -51,14 +51,6 @@
         validate_certs: no
       register: ceph_disk_creation
 
-    - name: Wait for Ceph disk creation to complete
-      wait_for:
-        path: "/var/lib/vz/images/{{ vm_id }}/vm-{{ vm_id }}-disk-0.raw"  # Path to the disk file (adjust path as needed)
-        state: present
-        delay: 10
-        timeout: 300
-      when: ceph_disk_creation.status == 200
-
     - name: Create VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu"
