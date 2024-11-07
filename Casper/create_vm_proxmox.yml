@@ -93,6 +93,36 @@
         validate_certs: no
       when: vm_creation.status == 200
 
+    - name: Generate Cloud-Init User-Data
+      copy:
+        content: |
+          #cloud-config
+          hostname: "{{ vm_name }}"
+          users:
+            - name: "{{ user_name }}"
+              sudo: "ALL=(ALL) NOPASSWD:ALL"
+              ssh_authorized_keys:
+                - "{{ ssh_key }}"
+              lock_passwd: true
+          password: "{{ user_password }}"
+          chpasswd: { expire: false }
+          ssh_pwauth: true
+          disable_root: false
+          timezone: "Europe/Copenhagen"
+          package_update: true
+          packages:
+            - vim
+            - curl
+            - git
+            - net-tools
+            - openssh
+          runcmd:
+            - echo "Running custom commands"
+            - ifconfig
+        dest: "/tmp/user-data"
+      delegate_to: localhost
+
+
     - name: Start VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
