@@ -1,11 +1,11 @@
-- name: "Set ntp for all linux servers"
+- name: "Install QEMU"
   hosts: guacamole
 
   tasks:
     - name: Test connection
       ansible.builtin.ping:
 
-    - name:
+    - name: Install QEMU
       apt:
         name: qemu-guest-agent
         state: latest
