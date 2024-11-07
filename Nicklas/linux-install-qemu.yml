@@ -1,6 +1,7 @@
 - name: "Install QEMU"
   hosts: guacamole
   become: true
+  become_pass: {{ 'guac become pass' }}
 
   tasks:
     - name: Install QEMU
