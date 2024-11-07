@@ -47,7 +47,7 @@
           vmid: "{{ vm_id }}"
           format: "raw"
           size: "{{ vm_disk_size }}"
-          filename: {{ filename }}
+          filename: "{{ filename }}"
         validate_certs: no
       register: ceph_disk_creation
 
