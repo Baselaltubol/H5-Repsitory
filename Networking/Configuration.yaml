@@ -1,0 +1,18 @@
+- name: Configure Cisco devices in POD2
+  hosts: cisco_devices
+  gather_facts: no
+  tasks:
+    - name: Set hostname
+      cisco.ios.ios_config:
+        lines:
+          - hostname "{{ inventory_hostname }}"
+
+    - name: Configure specific interfaces
+      cisco.ios.ios_interface:
+        name: "{{ interface_name }}"
+        description: "{{ interface_description }}"
+        enabled: true
+        state: present
+      vars:
+        interface_name: "{{ lookup('vars', inventory_hostname + '_interface') }}"
+        interface_description: "{{ lookup('vars', inventory_hostname + '_description') }}"

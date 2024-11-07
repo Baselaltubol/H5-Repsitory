@@ -1,0 +1,118 @@
+---
+- name: Create and configure a Proxmox VM with Ubuntu Server using cloud-init
+  hosts: proxmox15
+  gather_facts: no
+  vars:
+    proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
+    proxmox_user: "root@pam"
+    proxmox_password: "password"
+    vm_id: 402
+    vm_name: "Ubuntu-VM"
+    node: "proxmox15"
+    vm_storage: "CephStorage" # Replace with your Proxmox node name
+    iso_storage: "cephfs"
+    iso_image: "ubuntu-24.04.1-live-server-amd64.iso"  # ISO file path
+    cloudinit_storage: "local"
+    vm_disk_size: "32G"
+    vm_memory: 2048
+    vm_cores: 2
+    vm_net_bridge: "vmbr1"  # Network bridge in Proxmox
+    user_name: "user"
+    user_password: "password" 
+    filename: "vm-{{ vmid }}-disk-0"
+
+  tasks:
+    - name: Get Proxmox API token
+      uri:
+        url: "{{ proxmox_host }}/api2/json/access/ticket"
+        method: POST
+        body_format: json
+        body:
+          username: "{{ proxmox_user }}"
+          password: "{{ proxmox_password }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+      register: auth
+
+    - name: Create Ceph disk for VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        body_format: json
+        body:
+          vmid: "{{ vm_id }}"
+          format: "raw"
+          size: "{{ vm_disk_size }}"
+          filename: {{ filename }}
+        validate_certs: no
+      register: ceph_disk_creation
+
+    - name: Wait for Ceph disk creation to complete
+      wait_for:
+        path: "/var/lib/vz/images/{{ vm_id }}/vm-{{ vm_id }}-disk-0.raw"  # Path to the disk file (adjust path as needed)
+        state: present
+        delay: 10
+        timeout: 300
+      when: ceph_disk_creation.status == 200
+
+    - name: Create VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        body_format: json
+        body:
+          vmid: "{{ vm_id }}"
+          name: "{{ vm_name }}"
+          memory: "{{ vm_memory }}"
+          cores: "{{ vm_cores }}"
+          net0: "virtio,bridge={{ vm_net_bridge }}"
+          ide2: "{{ iso_storage }}:iso/{{ iso_image }},media=cdrom"
+          scsi0: "{{ vm_storage }}:vm-{{ vm_id }}-disk-0,size={{ vm_disk_size }}"
+          boot: "order=ide2;scsi0"
+          ostype: "l26"
+          onboot: 1
+        validate_certs: no
+      register: vm_creation
+
+    - name: Attach cloud-init drive to VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/config"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        body_format: json
+        body:
+          ide1: "{{ cloudinit_storage }}:cloudinit"
+          ciuser: "{{ user_name }}"
+          cipassword: "{{ user_password }}"
+          searchdomain: ""
+          nameserver: "8.8.8.8"  # Configure DNS
+          ipconfig0: "dhcp"
+        validate_certs: no
+      when: vm_creation.status == 200
+
+    - name: Start VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        validate_certs: no
+      when: vm_creation.status == 200
+
+    - name: Wait for VM to be accessible via SSH
+      wait_for:
+        host: "{{ vm_name }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      delegate_to: localhost
