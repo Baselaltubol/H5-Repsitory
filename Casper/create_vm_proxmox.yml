@@ -44,7 +44,7 @@
         body_format: json
         body:
           vmid: "{{ vm_id }}"
-          format: "{{ storage_format }}"
+          format: "rbd"
           size: "{{ vm_disk_size }}"
         validate_certs: no
       register: ceph_disk_creation
