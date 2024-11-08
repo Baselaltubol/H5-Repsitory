@@ -6,7 +6,7 @@
     proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
     proxmox_user: "root@pam"
     proxmox_password: "password"
-    vm_id: 402
+    vm_id: "402"
     vm_name: "Ubuntu-VM"
     node: "proxmox15"
     vm_storage: "CephStorage" # Replace with your Proxmox node name
@@ -94,7 +94,7 @@
       when: vm_creation.status == 200
 
     - name: Ensure 'pip3' and 'proxmoxer' are installed
-      hosts: proxmox15
+      hosts: localhost
       gather_facts: yes
       tasks:
         - name: Check if 'pip3' is installed
