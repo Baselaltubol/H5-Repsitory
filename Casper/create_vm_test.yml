@@ -155,13 +155,13 @@
 
 - name: Retrieve Proxmox VM IP address
   hosts: proxmox15
-  gather_facts: yes
+  gather_facts: no
   tasks:
     - name: Retrieve Proxmox VM IP address
       community.general.proxmox:
-        api_user: "{{ proxmox_user }}"
-        api_password: "{{ proxmox_password }}"
-        api_host: "{{ proxmox_host }}"
+        api_user: "root@pam"
+        api_password: "password"
+        api_host: proxmox15
         validate_certs: no
         node: "{{ proxmox_node }}"
         vmid: "{{ vm_id }}"
