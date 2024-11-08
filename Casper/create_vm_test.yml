@@ -92,6 +92,28 @@
         validate_certs: no
       when: vm_creation.status == 200
 
+    - name: Ensure 'pip3' and 'proxmoxer' are installed
+  hosts: proxmox15
+  gather_facts: yes
+  tasks:
+    - name: Check if 'pip3' is installed
+      ansible.builtin.command: which pip3
+      register: pip3_check
+      failed_when: false
+
+    - name: Install 'pip3' if missing (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
+        update_cache: yes
+      when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
+
+    - name: Install 'pip3' if missing (CentOS/RHEL)
+      ansible.builtin.yum:
+        name: python3-pip
+        state: present
+      when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"  
+
     - name: Ensure 'proxmoxer' Python library is installed
   hosts: proxmox15
   gather_facts: no
