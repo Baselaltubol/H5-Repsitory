@@ -1,31 +1,185 @@
-# Place this directly within the main play, without an extra `tasks` block
+---
+- name: Create and configure a Proxmox VM with Ubuntu Server using cloud-init
+  hosts: proxmox15
+  gather_facts: no
+  vars:
+    proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
+    proxmox_user: "root@pam"
+    proxmox_password: "password"
+    vm_id: "402"
+    vm_name: "Ubuntu-VM"
+    node: "proxmox15"
+    vm_storage: "CephStorage" # Replace with your Proxmox node name
+    iso_storage: "cephfs"
+    iso_image: "ubuntu-24.04.1-live-server-amd64.iso"  # ISO file path
+    cloudinit_storage: "CephStorage"
+    vm_disk_size: "32G"
+    vm_memory: 2048
+    vm_cores: 2
+    vm_net_bridge: "vmbr1"  # Network bridge in Proxmox
+    user_name: "user"
+    user_password: "password" 
+    filename: "vm-{{ vm_id }}-disk-0"
+    ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOEUhBbR8H/oNlEmoh56VNb4UwBqZKRVxZXL3FNDW/Jd semaphore@ansible"
 
-- name: Ensure 'pip3' and 'proxmoxer' are installed
-  - name: Check if 'pip3' is installed
-    ansible.builtin.command: which pip3
-    register: pip3_check
-    failed_when: false
+  tasks:
+    - name: Get Proxmox API token
+      uri:
+        url: "{{ proxmox_host }}/api2/json/access/ticket"
+        method: POST
+        body_format: json
+        body:
+          username: "{{ proxmox_user }}"
+          password: "{{ proxmox_password }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+      register: auth
 
-  - name: Install 'pip3' if missing (Debian/Ubuntu)
-    ansible.builtin.apt:
-      name: python3-pip
-      state: present
-      update_cache: yes
-    when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
+    - name: Create Ceph disk for VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        body_format: json
+        body:
+          vmid: "{{ vm_id }}"
+          format: "raw"
+          size: "{{ vm_disk_size }}"
+          filename: "{{ filename }}"
+        validate_certs: no
+      register: ceph_disk_creation
 
-  - name: Install 'pip3' if missing (CentOS/RHEL)
-    ansible.builtin.yum:
-      name: python3-pip
-      state: present
-    when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
+    - name: Create VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        body_format: json
+        body:
+          vmid: "{{ vm_id }}"
+          name: "{{ vm_name }}"
+          memory: "{{ vm_memory }}"
+          cores: "{{ vm_cores }}"
+          net0: "virtio,bridge={{ vm_net_bridge }}"
+          ide2: "{{ iso_storage }}:iso/{{ iso_image }},media=cdrom"
+          scsi0: "{{ vm_storage }}:vm-{{ vm_id }}-disk-0,size={{ vm_disk_size }}"
+          boot: "order=ide2;scsi0"
+          ostype: "l26"
+          onboot: 1
+        validate_certs: no
+        timeout: 120
+      register: vm_creation
 
-  - name: Install 'proxmoxer' with pip3 and --break-system-packages if needed
-    ansible.builtin.command:
-      cmd: "pip3 install proxmoxer --break-system-packages"
-    register: proxmoxer_installation
-    failed_when: proxmoxer_installation.rc != 0
+    - name: Attach cloud-init drive to VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/config"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        body_format: json
+        body:
+          ide1: "{{ cloudinit_storage }}:cloudinit"
+          ciuser: "{{ user_name }}"
+          cipassword: "{{ user_password }}"
+          keyboard: "da"  # Set keyboard to Danish
+          ipconfig0: "ip=dhcp"  # Enable DHCP
+        validate_certs: no
+      when: vm_creation.status == 200
 
-  - name: Verify 'proxmoxer' installation
-    ansible.builtin.fail:
-      msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-    when: proxmoxer_installation.rc != 0
+    - name: Ensure 'pip3' and 'proxmoxer' are installed
+      - name: Check if 'pip3' is installed
+        ansible.builtin.command: which pip3
+        register: pip3_check
+        failed_when: false
+
+      - name: Install 'pip3' if missing (Debian/Ubuntu)
+        ansible.builtin.apt:
+          name: python3-pip
+          state: present
+          update_cache: yes
+        when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
+
+      - name: Install 'pip3' if missing (CentOS/RHEL)
+        ansible.builtin.yum:
+          name: python3-pip
+          state: present
+        when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
+
+      - name: Install 'proxmoxer' with pip3 and --break-system-packages if needed
+        ansible.builtin.command:
+          cmd: "pip3 install proxmoxer --break-system-packages"
+        register: proxmoxer_installation
+        failed_when: proxmoxer_installation.rc != 0
+
+      - name: Verify 'proxmoxer' installation
+        ansible.builtin.fail:
+          msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
+        when: proxmoxer_installation.rc != 0
+
+    - name: Retrieve Proxmox VM IP address
+      community.general.proxmox:
+        api_user: "root@pam"
+        api_password: "password"
+        api_host: proxmox15
+        validate_certs: no
+        node: "proxmox15"
+        vmid: "{{ vm_id }}"
+        state: started
+      register: vm_info
+
+    - name: Set VM IP Address from DHCP
+      set_fact:
+        vm_ip: "{{ vm_info['ansible_facts']['network_interfaces'][0]['ip-addresses'][0] }}"
+
+    - name: Generate Cloud-Init User-Data
+      copy:
+        content: |
+          #cloud-config
+          hostname: {{ vm_name }}
+          users:
+            - name: "{{ user_name }}"
+              sudo: "ALL=(ALL) NOPASSWD:ALL"
+              ssh_authorized_keys:
+                - "{{ ssh_key }}"
+              lock_passwd: true
+          password: "{{ user_password }}"
+          chpasswd: { expire: false }
+          ssh_pwauth: true
+          disable_root: false
+          timezone: "Europe/Copenhagen"
+          package_update: true
+          packages:
+            - vim
+            - curl
+            - git
+            - net-tools
+            - openssh
+          runcmd:
+            - echo "Running custom commands"
+            - ifconfig
+        dest: "/tmp/user-data"
+      delegate_to: "{{ vm_ip }}"
+
+    - name: Start VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        validate_certs: no
+      when: vm_creation.status == 200
+
+    - name: Wait for VM to be accessible via SSH
+      wait_for:
+        host: "{{ vm_name }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      delegate_to: localhost
