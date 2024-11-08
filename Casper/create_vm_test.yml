@@ -101,7 +101,7 @@
         validate_certs: no
         node: "proxmox15"
         vmid: "{{ vm_id }}"
-        state: info
+        state: started
       register: vm_info
 
     - name: Set VM IP Address from DHCP
