@@ -122,7 +122,7 @@
         port: 8006  # Proxmox's web API port
         delay: 10
         timeout: 300
-      delegate_to: {{ vm_id }}
+      delegate_to: proxmox15
   
 
 
