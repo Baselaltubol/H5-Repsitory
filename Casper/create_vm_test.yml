@@ -118,7 +118,7 @@
      # Ensure VM is up before retrieving IP
     - name: Wait for the VM to be up and running
       wait_for:
-        host: "{{ proxmox_host }}"
+        host: "https://10.131.9.150"
         port: 8006  # Proxmox's web API port
         delay: 10
         timeout: 300
