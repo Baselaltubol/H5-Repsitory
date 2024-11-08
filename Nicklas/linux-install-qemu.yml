@@ -1,7 +1,6 @@
 - name: "Install QEMU"
   hosts: guacamole
   become: true
-  ansible_become_pass: "password"
 
   tasks:
     - name: Install QEMU
