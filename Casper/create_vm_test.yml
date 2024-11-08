@@ -155,6 +155,7 @@
 
 - name: Retrieve Proxmox VM IP address
   hosts: proxmox15
+  gather_facts: yes
   tasks:
     - name: Retrieve Proxmox VM IP address
       community.general.proxmox:
