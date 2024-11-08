@@ -172,7 +172,7 @@
       community.general.proxmox:
         api_user: "root@pam"
         api_password: "password"
-        api_host: proxmox15
+        api_host: "https://10.131.9.150:8006"
         validate_certs: no
         node: "proxmox15"
         vmid: 403
