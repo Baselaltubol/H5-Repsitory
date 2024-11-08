@@ -24,6 +24,28 @@
     proxmox_node: "proxmox15"
 
   tasks:
+    - name: Set global facts for Proxmox VM
+      set_fact:
+        proxmox_host: "{{ proxmox_host }}"
+        proxmox_user: "{{ proxmox_user }}"
+        proxmox_password: "{{ proxmox_password }}"
+        vm_id: "{{ vm_id }}"
+        vm_name: "{{ vm_name }}"
+        node: "{{ node }}"
+        vm_storage: "{{ vm_storage }}"
+        iso_storage: "{{ iso_storage }}"
+        cloudinit_storage: "{{ cloudinit_storage }}"
+        vm_disk_size: "{{ vm_disk_size }}"
+        vm_memory: "{{ vm_memory }}"
+        vm_cores: "{{ vm_cores }}"
+        vm_net_bridge: "{{ vm_net_bridge }}"
+        user_name: "{{ user_name }}"
+        user_password: "{{ user_password }}"
+        filename: "{{ filename }}"
+        ssh_key: "{{ ssh_key }}"
+        proxmox_node: "{{ proxmox_node }}"
+
+  tasks:
     - name: Get Proxmox API token
       uri:
         url: "{{ proxmox_host }}/api2/json/access/ticket"
