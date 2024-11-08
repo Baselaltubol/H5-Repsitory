@@ -100,8 +100,8 @@
         - name: Check if 'proxmoxer' is installed
           ansible.builtin.pip:
           name: proxmoxer
-          state: present
-         register: proxmoxer_installation
+           state: present
+          register: proxmoxer_installation
 
         - name: Verify 'proxmoxer' installation
           ansible.builtin.fail:
