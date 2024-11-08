@@ -21,7 +21,7 @@
     user_password: "password" 
     filename: "vm-{{ vm_id }}-disk-0"
     ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOEUhBbR8H/oNlEmoh56VNb4UwBqZKRVxZXL3FNDW/Jd semaphore@ansible"
-  
+
   tasks:
     - name: Get Proxmox API token
       uri:
@@ -50,6 +50,17 @@
       set_fact:
         disk_exists: "{{ filename in disk_check.json.data | map(attribute='volid') | list }}"
 
+    - name: Remove existing Ceph disk for VM if it exists
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content/{{ filename }}"
+        method: DELETE
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        validate_certs: no
+      when: disk_exists | default(false) == true
+      register: disk_removed
+
     - name: Create Ceph disk for VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content"
@@ -68,6 +79,7 @@
       register: ceph_disk_creation
 
     # The rest of your tasks...
+
 
 
     - name: Create VM as a QEMU instance
