@@ -46,9 +46,17 @@
         validate_certs: no
       register: disk_check
 
+    - name: Debug disk_check output
+      debug:
+        var: disk_check.json.data
+
     - name: Set disk_exists variable if disk is found
       set_fact:
         disk_exists: "{{ filename in disk_check.json.data | map(attribute='volid') | list }}"
+
+    - name: Debug disk_exists variable
+      debug:
+        var: disk_exists
 
     - name: Remove existing Ceph disk for VM if it exists
       uri:
@@ -79,8 +87,6 @@
       register: ceph_disk_creation
 
     # The rest of your tasks...
-
-
 
     - name: Create VM as a QEMU instance
       uri:
