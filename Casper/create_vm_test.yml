@@ -136,15 +136,16 @@
             - ifconfig
         dest: "/tmp/user-data"
       delegate_to: "{{ vm_ip }}"
-        - name: Start VM
-          uri:
-            url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
-            method: POST
-            headers:
-              CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
-              Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
-            validate_certs: no
-          when: vm_creation.status == 200
+      
+    - name: Start VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
+       method: POST
+       headers:
+         CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        validate_certs: no
+      when: vm_creation.status == 200
 
     - name: Wait for VM to be accessible via SSH
       wait_for:
