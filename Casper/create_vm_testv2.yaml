@@ -36,6 +36,21 @@
         validate_certs: no
       register: auth
 
+    - name: Check if Ceph disk already exists for VM
+      uri:
+        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content"
+        method: GET
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+        validate_certs: no
+      register: disk_check
+
+    - name: Set disk_exists variable if disk is found
+      set_fact:
+        disk_exists: true
+      when: "'{{ filename }}' in disk_check.json.data | map(attribute='volid') | list"
+
     - name: Create Ceph disk for VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/storage/{{ vm_storage }}/content"
@@ -50,7 +65,11 @@
           size: "{{ vm_disk_size }}"
           filename: "{{ filename }}"
         validate_certs: no
+      when: not disk_exists
       register: ceph_disk_creation
+
+    # The rest of your tasks...
+
 
     - name: Create VM as a QEMU instance
       uri:
