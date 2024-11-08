@@ -133,10 +133,10 @@
         validate_certs: no
       when: vm_creation.status == 200
 
-    - name: Wait for VM to be accessible via SSH
-      wait_for:
-        host: "{{ vm_name }}"
-        port: 22
-        delay: 10
-        timeout: 300
-      delegate_to: localhost
+   # - name: Wait for VM to be accessible via SSH
+    #  wait_for:
+     #   host: "{{ vm_name }}"
+      #  port: 22
+       # delay: 10
+        #timeout: 300
+      #delegate_to: localhost
