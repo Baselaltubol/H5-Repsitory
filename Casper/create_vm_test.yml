@@ -140,7 +140,7 @@
         api_host: "your_proxmox_host"
         validate_certs: no
         node: "your_proxmox_node"
-        vmid: "{{ vmid }}"
+        vmid: "{{ vm_id }}"
         state: info
       register: vm_info
 
