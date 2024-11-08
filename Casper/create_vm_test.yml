@@ -140,9 +140,9 @@
     - name: Start VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
-       method: POST
-       headers:
-         CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+        method: POST
+        headers:
+          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
           Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
         validate_certs: no
       when: vm_creation.status == 200
