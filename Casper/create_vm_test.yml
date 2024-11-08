@@ -93,10 +93,10 @@
         validate_certs: no
       when: vm_creation.status == 200
 
-    - name: Ensure 'pip3' and 'proxmoxer' are installed
-      hosts: proxmox15
-      gather_facts: no
-      tasks:
+    #- name: Ensure 'pip3' and 'proxmoxer' are installed
+     #hosts: proxmox15
+     # gather_facts: no
+     # tasks:
       
         - name: Check if 'pip3' is installed
           ansible.builtin.command: which pip3
