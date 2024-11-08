@@ -21,6 +21,7 @@
     user_password: "password" 
     filename: "vm-{{ vm_id }}-disk-0"
     ssh_key: "ssh-ed25519%20AAAAC3NzaC1lZDI1NTE5AAAAIOEUhBbR8H/oNlEmoh56VNb4UwBqZKRVxZXL3FNDW/Jd%20semaphore@ansible"
+    proxmox_node: "proxmox15"
 
   tasks:
     - name: Get Proxmox API token
@@ -135,11 +136,11 @@
   tasks:
     - name: Retrieve Proxmox VM IP address
       community.general.proxmox:
-        api_user: "your_proxmox_user@pam"
-        api_password: "your_proxmox_password"
-        api_host: "your_proxmox_host"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        api_host: "{{ proxmox_host }}"
         validate_certs: no
-        node: "your_proxmox_node"
+        node: "{{ proxmox_node }}"
         vmid: "{{ vm_id }}"
         state: info
       register: vm_info
