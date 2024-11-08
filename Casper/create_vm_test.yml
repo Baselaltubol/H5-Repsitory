@@ -115,17 +115,22 @@
         state: present
       when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
 
-    - name: Ensure 'proxmoxer' Python library is installed
-      ansible.builtin.pip:
-        name: proxmoxer
-        executable: pip3
-        state: present
+    - name: Check if 'proxmoxer' is already installed
+      ansible.builtin.command: "pip3 show proxmoxer"
+      register: proxmoxer_check
+      failed_when: false
+
+    - name: Install 'proxmoxer' if not already present
+      ansible.builtin.command:
+        cmd: "pip3 install proxmoxer --break-system-packages"
+      when: proxmoxer_check.rc != 0
       register: proxmoxer_installation
+      failed_when: proxmoxer_installation.rc != 0
 
     - name: Verify 'proxmoxer' installation
       ansible.builtin.fail:
         msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-      when: proxmoxer_installation is failed
+      when: proxmoxer_installation.rc != 0
 
     - name: Retrieve Proxmox VM IP address
       community.general.proxmox:
