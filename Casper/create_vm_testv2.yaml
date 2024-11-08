@@ -21,7 +21,7 @@
     user_password: "password" 
     filename: "vm-{{ vm_id }}-disk-0"
     ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOEUhBbR8H/oNlEmoh56VNb4UwBqZKRVxZXL3FNDW/Jd semaphore@ansible"
-
+  
   tasks:
     - name: Get Proxmox API token
       uri:
@@ -48,8 +48,7 @@
 
     - name: Set disk_exists variable if disk is found
       set_fact:
-        disk_exists: true
-      when: "'{{ filename }}' in disk_check.json.data | map(attribute='volid') | list"
+        disk_exists: "{{ filename in disk_check.json.data | map(attribute='volid') | list }}"
 
     - name: Create Ceph disk for VM
       uri:
@@ -65,7 +64,7 @@
           size: "{{ vm_disk_size }}"
           filename: "{{ filename }}"
         validate_certs: no
-      when: not disk_exists
+      when: disk_exists | default(false) == false
       register: ceph_disk_creation
 
     # The rest of your tasks...
