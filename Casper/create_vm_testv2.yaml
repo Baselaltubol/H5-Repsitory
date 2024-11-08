@@ -3,20 +3,20 @@
   hosts: proxmox15
   gather_facts: no
   vars:
-    proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
+    proxmox_host: "https://10.131.9.150:8006"
     proxmox_user: "root@pam"
     proxmox_password: "password"
     vm_id: "402"
     vm_name: "Ubuntu-VM"
     node: "proxmox15"
-    vm_storage: "CephStorage" # Replace with your Proxmox node name
+    vm_storage: "CephStorage"
     iso_storage: "cephfs"
-    iso_image: "ubuntu-24.04.1-live-server-amd64.iso"  # ISO file path
+    iso_image: "ubuntu-24.04.1-live-server-amd64.iso"
     cloudinit_storage: "CephStorage"
     vm_disk_size: "32G"
     vm_memory: 2048
     vm_cores: 2
-    vm_net_bridge: "vmbr1"  # Network bridge in Proxmox
+    vm_net_bridge: "vmbr1"
     user_name: "user"
     user_password: "password" 
     filename: "vm-{{ vm_id }}-disk-0"
@@ -52,7 +52,7 @@
         validate_certs: no
       register: ceph_disk_creation
 
-    - name: Create VM
+    - name: Create VM as a QEMU instance
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu"
         method: POST
@@ -71,26 +71,10 @@
           boot: "order=ide2;scsi0"
           ostype: "l26"
           onboot: 1
+          type: "qemu"  # Explicitly set the VM type as QEMU
         validate_certs: no
         timeout: 120
       register: vm_creation
-
-    - name: Attach cloud-init drive to VM
-      uri:
-        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/config"
-        method: POST
-        headers:
-          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
-          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
-        body_format: json
-        body:
-          ide1: "{{ cloudinit_storage }}:cloudinit"
-          ciuser: "{{ user_name }}"
-          cipassword: "{{ user_password }}"
-          keyboard: "da"  # Set keyboard to Danish
-          ipconfig0: "ip=dhcp"  # Enable DHCP
-        validate_certs: no
-      when: vm_creation.status == 200
 
     - name: Ensure 'pip3' and 'proxmoxer' are installed
       block:
@@ -123,51 +107,7 @@
             msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
           when: proxmoxer_installation.rc != 0
 
-    - name: Retrieve Proxmox VM IP address
-      community.general.proxmox:
-        api_user: "root@pam"
-        api_password: "password"
-        api_host: proxmox15
-        validate_certs: no
-        node: "proxmox15"
-        vmid: "{{ vm_id }}"
-        state: started
-      register: vm_info
-
-    - name: Set VM IP Address from DHCP
-      set_fact:
-        vm_ip: "{{ vm_info['ansible_facts']['network_interfaces'][0]['ip-addresses'][0] }}"
-
-    - name: Generate Cloud-Init User-Data
-      copy:
-        content: |
-          #cloud-config
-          hostname: {{ vm_name }}
-          users:
-            - name: "{{ user_name }}"
-              sudo: "ALL=(ALL) NOPASSWD:ALL"
-              ssh_authorized_keys:
-                - "{{ ssh_key }}"
-              lock_passwd: true
-          password: "{{ user_password }}"
-          chpasswd: { expire: false }
-          ssh_pwauth: true
-          disable_root: false
-          timezone: "Europe/Copenhagen"
-          package_update: true
-          packages:
-            - vim
-            - curl
-            - git
-            - net-tools
-            - openssh
-          runcmd:
-            - echo "Running custom commands"
-            - ifconfig
-        dest: "/tmp/user-data"
-      delegate_to: "{{ vm_ip }}"
-
-    - name: Start VM
+    - name: Start VM if creation succeeded
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
         method: POST
