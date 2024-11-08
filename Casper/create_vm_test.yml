@@ -97,6 +97,7 @@
       hosts: proxmox15
       gather_facts: no
       tasks:
+      
         - name: Check if 'pip3' is installed
           ansible.builtin.command: which pip3
           register: pip3_check
