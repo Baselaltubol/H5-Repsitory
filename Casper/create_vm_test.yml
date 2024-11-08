@@ -6,7 +6,7 @@
     proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
     proxmox_user: "root@pam"
     proxmox_password: "password"
-    vm_id: "403"
+    vm_id: 403
     vm_name: "Ubuntu-VM"
     node: "proxmox15"
     vm_storage: "CephStorage" # Replace with your Proxmox node name
@@ -164,7 +164,7 @@
         api_host: proxmox15
         validate_certs: no
         node: "proxmox15"
-        vmid: "403"
+        vmid: 403
         state: started
       register: vm_info
 
