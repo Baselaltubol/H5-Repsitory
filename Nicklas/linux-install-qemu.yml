@@ -1,5 +1,5 @@
 - name: "Install QEMU"
-  hosts: all
+  hosts: linux
   become: true
 
   tasks:
