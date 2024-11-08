@@ -163,8 +163,8 @@
         api_password: "password"
         api_host: proxmox15
         validate_certs: no
-        node: "{{ proxmox_node }}"
-        vmid: "{{ vm_id }}"
+        node: "proxmox15"
+        vmid: "403"
         state: info
       register: vm_info
 
