@@ -50,6 +50,21 @@
       register: proxmoxer_installation
       failed_when: proxmoxer_installation.rc != 0
 
+    - name: Create Ceph storage disk
+      command: >
+        qm disk create {{ vm_id }} 
+        --size {{ vm_disk_size }} 
+        --storage {{ vm_storage }} 
+        --format raw
+        --filename {{ filename }}
+      register: disk_creation
+      ignore_errors: true  # Continue if disk already exists or other errors
+
+    - name: Check if Ceph disk creation was successful
+      debug:
+        msg: "Ceph disk created successfully for VM {{ vm_name }}"
+      when: disk_creation.rc == 0
+
     - name: Create VM with qm command
       command: >
         qm create {{ vm_id }} 
