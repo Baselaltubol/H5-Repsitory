@@ -116,11 +116,11 @@
             state: present
           when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
 
-        - name: Install 'proxmoxer' with pip3 and --break-system-packages if needed
-          ansible.builtin.command:
-            cmd: "pip3 install proxmoxer --break-system-packages"
-          register: proxmoxer_installation
-          failed_when: proxmoxer_installation.rc != 0
+        #- name: Install 'proxmoxer' with pip3 and --break-system-packages if needed
+         # ansible.builtin.command:
+          #  cmd: "pip3 install proxmoxer --break-system-packages"
+         # register: proxmoxer_installation
+         # failed_when: proxmoxer_installation.rc != 0
 
         #- name: Verify 'proxmoxer' installation
         #  ansible.builtin.fail:
