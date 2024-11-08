@@ -94,19 +94,19 @@
       when: vm_creation.status == 200
 
     - name: Ensure 'proxmoxer' Python library is installed
-       hosts: proxmox15
-       gather_facts: no
-       tasks:
-         - name: Check if 'proxmoxer' is installed
-           ansible.builtin.pip:
-           name: proxmoxer
-             state: present
-           register: proxmoxer_installation
+      hosts: proxmox15
+      gather_facts: no
+      tasks:
+        - name: Check if 'proxmoxer' is installed
+          ansible.builtin.pip:
+          name: proxmoxer
+           state: present
+         register: proxmoxer_installation
 
-         - name: Verify 'proxmoxer' installation
-           ansible.builtin.fail:
-             msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-           when: proxmoxer_installation is failed
+        - name: Verify 'proxmoxer' installation
+          ansible.builtin.fail:
+            msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
+          when: proxmoxer_installation is failed
 
       - name: Retrieve Proxmox VM IP address
         community.general.proxmox:
