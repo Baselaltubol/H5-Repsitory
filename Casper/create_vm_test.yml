@@ -113,6 +113,7 @@
           keyboard: "da"  # Set keyboard to Danish
           ipconfig0: "ip=dhcp"  # Enable DHCP
         validate_certs: no
+        timeout: 60
       when: vm_creation.status == 200
 
     - name: Ensure 'pip3' and 'proxmoxer' are installed
