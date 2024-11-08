@@ -75,7 +75,6 @@
         timeout: 120
       register: vm_creation
 
-   
     - name: Attach cloud-init drive to VM
       uri:
         url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/config"
@@ -92,6 +91,40 @@
           ipconfig0: "ip=dhcp"  # Enable DHCP
         validate_certs: no
       when: vm_creation.status == 200
+
+    - name: Ensure 'proxmoxer' Python library is installed
+  hosts: proxmox15
+  gather_facts: no
+  tasks:
+    - name: Check if 'proxmoxer' is installed
+      ansible.builtin.pip:
+        name: proxmoxer
+        state: present
+      register: proxmoxer_installation
+
+    - name: Verify 'proxmoxer' installation
+      ansible.builtin.fail:
+        msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
+      when: proxmoxer_installation is failed
+
+- name: Retrieve Proxmox VM IP address
+  hosts: proxmox15
+  tasks:
+    - name: Retrieve Proxmox VM IP address
+      community.general.proxmox:
+        api_user: "your_proxmox_user@pam"
+        api_password: "your_proxmox_password"
+        api_host: "your_proxmox_host"
+        validate_certs: no
+        node: "your_proxmox_node"
+        vmid: "{{ vmid }}"
+        state: info
+      register: vm_info
+
+    - name: Set VM IP Address from DHCP
+      set_fact:
+        vm_ip: "{{ vm_info['ansible_facts']['network_interfaces'][0]['ip-addresses'][0] }}"
+  
 
     - name: Generate Cloud-Init User-Data
       copy:
