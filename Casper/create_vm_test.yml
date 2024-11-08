@@ -94,59 +94,57 @@
       when: vm_creation.status == 200
 
     - name: Retrieve Proxmox VM IP address
-    community.general.proxmox:
-      api_user: "root@pam"
-      api_password: "password"
-      api_host: proxmox15
-      validate_certs: no
-      node: "proxmox15"
-      vmid: "{{ vmid }}"
-      state: info
-    register: vm_info
-
-   - name: Set VM IP Address from DHCP
-     set_fact:
-       vm_ip: "{{ vm_info['ansible_facts']['network_interfaces'][0]['ip-addresses'][0] }}"
-
-   - name: Generate Cloud-Init User-Data
-     copy:
-       content: |
-         #cloud-config
-         hostname: {{ vm_name }}
-         users:
-           - name: "{{ user_name }}"
-             sudo: "ALL=(ALL) NOPASSWD:ALL"
-             ssh_authorized_keys:
-               - "{{ ssh_key }}"
-             lock_passwd: true
-         password: "{{ user_password }}"
-         chpasswd: { expire: false }
-         ssh_pwauth: true
-        disable_root: false
-         timezone: "Europe/Copenhagen"
-         package_update: true
-         packages:
-           - vim
-           - curl
-           - git
-           - net-tools
-           - openssh
-         runcmd:
-           - echo "Running custom commands"
-           - ifconfig
-       dest: "/tmp/user-data"
-     delegate_to: "{{ vm_ip }}"
-
-
-    - name: Start VM
-      uri:
-        url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
-        method: POST
-        headers:
-          CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
-          Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+      community.general.proxmox:
+        api_user: "your_proxmox_user@pam"
+        api_password: "your_proxmox_password"
+        api_host: "your_proxmox_host"
         validate_certs: no
-      when: vm_creation.status == 200
+        node: "your_proxmox_node"
+        vmid: "{{ vmid }}"
+        state: info
+      register: vm_info
+
+    - name: Set VM IP Address from DHCP
+      set_fact:
+        vm_ip: "{{ vm_info['ansible_facts']['network_interfaces'][0]['ip-addresses'][0] }}"
+
+    - name: Generate Cloud-Init User-Data
+      copy:
+        content: |
+          #cloud-config
+          hostname: {{ vm_name }}
+          users:
+            - name: "{{ user_name }}"
+              sudo: "ALL=(ALL) NOPASSWD:ALL"
+              ssh_authorized_keys:
+                - "{{ ssh_key }}"
+              lock_passwd: true
+          password: "{{ user_password }}"
+          chpasswd: { expire: false }
+          ssh_pwauth: true
+          disable_root: false
+          timezone: "Europe/Copenhagen"
+          package_update: true
+          packages:
+            - vim
+            - curl
+            - git
+            - net-tools
+            - openssh
+          runcmd:
+            - echo "Running custom commands"
+            - ifconfig
+        dest: "/tmp/user-data"
+      delegate_to: "{{ vm_ip }}"
+        - name: Start VM
+          uri:
+            url: "{{ proxmox_host }}/api2/json/nodes/{{ node }}/qemu/{{ vm_id }}/status/start"
+            method: POST
+            headers:
+              CSRFPreventionToken: "{{ auth.json.data.CSRFPreventionToken }}"
+              Cookie: "PVEAuthCookie={{ auth.json.data.ticket }}"
+            validate_certs: no
+          when: vm_creation.status == 200
 
     - name: Wait for VM to be accessible via SSH
       wait_for:
