@@ -1,5 +1,5 @@
 - name: "Install QEMU"
-  hosts: guacamole
+  hosts: all
   become: true
 
   tasks:
