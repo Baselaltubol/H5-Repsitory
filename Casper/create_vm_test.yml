@@ -93,44 +93,43 @@
         validate_certs: no
       when: vm_creation.status == 200
 
-    - name: Ensure 'pip3' and 'proxmoxer' are installed
-      hosts: proxmox15
-      gather_facts: no
-      tasks:
-        - name: Check if 'pip3' is installed
-          ansible.builtin.command: which pip3
-          register: pip3_check
-          failed_when: false
+     - name: Ensure 'pip3' and 'proxmoxer' are installed
+       hosts: proxmox15
+       tasks:
+         - name: Check if 'pip3' is installed
+           ansible.builtin.command: which pip3
+           register: pip3_check
+           failed_when: false
 
-        - name: Install 'pip3' if missing (Debian/Ubuntu)
-          ansible.builtin.apt:
-            name: python3-pip
-            state: present
-            update_cache: yes
-          when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
+         - name: Install 'pip3' if missing (Debian/Ubuntu)
+           ansible.builtin.apt:
+             name: python3-pip
+             state: present
+             update_cache: yes
+           when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
 
-        - name: Install 'pip3' if missing (CentOS/RHEL)
-          ansible.builtin.yum:
-            name: python3-pip
-            state: present
-          when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
+         - name: Install 'pip3' if missing (CentOS/RHEL)
+           ansible.builtin.yum:
+             name: python3-pip
+             state: present
+           when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
 
-        - name: Check if 'proxmoxer' is already installed
-          ansible.builtin.command: "pip3 show proxmoxer"
-          register: proxmoxer_check
-          failed_when: false
+         - name: Check if 'proxmoxer' is already installed
+           ansible.builtin.command: "pip3 show proxmoxer"
+           register: proxmoxer_check
+           failed_when: false
 
-        - name: Install 'proxmoxer' if not already present
-          ansible.builtin.command:
-            cmd: "pip3 install proxmoxer --break-system-packages"
-          when: proxmoxer_check.rc != 0
-          register: proxmoxer_installation
-          failed_when: proxmoxer_installation.rc != 0
+         - name: Install 'proxmoxer' if not already present
+           ansible.builtin.command:
+             cmd: "pip3 install proxmoxer --break-system-packages"
+           when: proxmoxer_check.rc != 0
+           register: proxmoxer_installation
+           failed_when: proxmoxer_installation.rc != 0
 
-        - name: Verify 'proxmoxer' installation
-          ansible.builtin.fail:
-            msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-          when: proxmoxer_installation.rc != 0
+         - name: Verify 'proxmoxer' installation
+           ansible.builtin.fail:
+             msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
+           when: proxmoxer_installation.rc != 0
 
     - name: Retrieve Proxmox VM IP address
       community.general.proxmox:
