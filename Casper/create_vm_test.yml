@@ -6,7 +6,7 @@
     proxmox_host: "https://10.131.9.150:8006"  # Proxmox API URL
     proxmox_user: "root@pam"
     proxmox_password: "password"
-    vm_id: "402"
+    vm_id: "403"
     vm_name: "Ubuntu-VM"
     node: "proxmox15"
     vm_storage: "CephStorage" # Replace with your Proxmox node name
@@ -122,10 +122,10 @@
           register: proxmoxer_installation
           failed_when: proxmoxer_installation.rc != 0
 
-        - name: Verify 'proxmoxer' installation
-          ansible.builtin.fail:
-            msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-          when: proxmoxer_installation.rc != 0
+        #- name: Verify 'proxmoxer' installation
+        #  ansible.builtin.fail:
+        #    msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
+         # when: proxmoxer_installation.rc != 0
 
     - name: Retrieve Proxmox VM IP address
       community.general.proxmox:
