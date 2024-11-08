@@ -1,32 +1,31 @@
-# Remove hosts and gather_facts from the task block, so it looks like this:
+# Place this directly within the main play, without an extra `tasks` block
 
-  - name: Ensure 'pip3' and 'proxmoxer' are installed
-    tasks:
-      - name: Check if 'pip3' is installed
-        ansible.builtin.command: which pip3
-        register: pip3_check
-        failed_when: false
+- name: Ensure 'pip3' and 'proxmoxer' are installed
+  - name: Check if 'pip3' is installed
+    ansible.builtin.command: which pip3
+    register: pip3_check
+    failed_when: false
 
-      - name: Install 'pip3' if missing (Debian/Ubuntu)
-        ansible.builtin.apt:
-          name: python3-pip
-          state: present
-          update_cache: yes
-        when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
+  - name: Install 'pip3' if missing (Debian/Ubuntu)
+    ansible.builtin.apt:
+      name: python3-pip
+      state: present
+      update_cache: yes
+    when: pip3_check.rc != 0 and ansible_facts['os_family'] == "Debian"
 
-      - name: Install 'pip3' if missing (CentOS/RHEL)
-        ansible.builtin.yum:
-          name: python3-pip
-          state: present
-        when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
+  - name: Install 'pip3' if missing (CentOS/RHEL)
+    ansible.builtin.yum:
+      name: python3-pip
+      state: present
+    when: pip3_check.rc != 0 and ansible_facts['os_family'] == "RedHat"
 
-      - name: Install 'proxmoxer' with pip3 and --break-system-packages if needed
-        ansible.builtin.command:
-          cmd: "pip3 install proxmoxer --break-system-packages"
-        register: proxmoxer_installation
-        failed_when: proxmoxer_installation.rc != 0
+  - name: Install 'proxmoxer' with pip3 and --break-system-packages if needed
+    ansible.builtin.command:
+      cmd: "pip3 install proxmoxer --break-system-packages"
+    register: proxmoxer_installation
+    failed_when: proxmoxer_installation.rc != 0
 
-      - name: Verify 'proxmoxer' installation
-        ansible.builtin.fail:
-          msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-        when: proxmoxer_installation.rc != 0
+  - name: Verify 'proxmoxer' installation
+    ansible.builtin.fail:
+      msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
+    when: proxmoxer_installation.rc != 0
