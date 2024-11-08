@@ -95,7 +95,7 @@
 
     - name: Ensure 'pip3' and 'proxmoxer' are installed
       hosts: proxmox15
-      gather_facts: yes
+      gather_facts: no
       
     - name: Check if 'pip3' is installed
       ansible.builtin.command: which pip3
