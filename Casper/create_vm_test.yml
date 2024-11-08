@@ -93,36 +93,6 @@
         validate_certs: no
       when: vm_creation.status == 200
 
-    - name: Ensure 'proxmoxer' Python library is installed
-      hosts: proxmox15
-      gather_facts: no
-      tasks:
-        - name: Check if 'proxmoxer' is installed
-          ansible.builtin.pip:
-          name: proxmoxer
-           state: present
-          register: proxmoxer_installation
-
-        - name: Verify 'proxmoxer' installation
-          ansible.builtin.fail:
-            msg: "Failed to install the required Python library 'proxmoxer' on {{ inventory_hostname }}. Ensure 'proxmoxer' is available or install it manually. If Ansible is using the wrong Python interpreter, consult the documentation on ansible_python_interpreter."
-          when: proxmoxer_installation is failed
-
-      - name: Retrieve Proxmox VM IP address
-        community.general.proxmox:
-          api_user: "root@pam"
-          api_password: "password"
-          api_host: proxmox15
-          validate_certs: no
-          node: "proxmox15"
-          vmid: "{{ vm_id }}"
-          state: started
-        register: vm_info
-
-    - name: Set VM IP Address from DHCP
-      set_fact:
-        vm_ip: "{{ vm_info['ansible_facts']['network_interfaces'][0]['ip-addresses'][0] }}"
-
     - name: Generate Cloud-Init User-Data
       copy:
         content: |
