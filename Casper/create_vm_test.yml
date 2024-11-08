@@ -97,7 +97,7 @@
       copy:
         content: |
           #cloud-config
-          hostname: "{{ vm_name }}"
+          hostname: {{vm_name}}
           users:
             - name: "{{ user_name }}"
               sudo: "ALL=(ALL) NOPASSWD:ALL"
